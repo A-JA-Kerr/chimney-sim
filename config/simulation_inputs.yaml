@@ -1,0 +1,20 @@
+simulation:
+  t_simulation: 3000.0  # Total simulation time in seconds
+  timestep: 1.0       # Time step for simulation in seconds
+
+environment:
+  T_amb: 15.0       # Ambient temperature (degrees C)
+  P_amb: 101325.0       # Ambient pressure (Pa)
+  v_wind: 0.0         # Wind velocity (m/s)
+
+combustion:
+  T_flue_inlet:       # List of flue gas inlet temperatures (K) for comparison
+    - 440.0
+    - 470.0
+    - 500.0
+    - 530.0
+  excess_air:         # List of excess air ratios for comparison
+    - 1.5
+    - 1.75
+    - 2.0
+    - 2.25

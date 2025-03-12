@@ -54,136 +54,154 @@ timestep = 1.0
 T_flue_inlet = Q_(515.0, 'K')
 excess_air = 1.5
 
-# gravitational accel
-grav = Q_(9.8, 'm/s**2')
+def run_simulation(t_simulation, timestep, T_amb, P_amb, v_wind, T_flue_inlet, excess_air):
+    """
+    Runs the chimney draft simulation with the given inputs.
 
-""" Simulation time """
-times = np.arange(0.0, t_simulation, timestep)
+    Parameters
+    ----------
+    t_simulation : float
+        Total simulation time in seconds.
+    timestep : float
+        Time step for simulation in seconds.
+    T_amb : pint.Quantity
+        Ambient temperature.
+    P_amb : pint.Quantity
+        Ambient pressure.
+    v_wind : pint.Quantity
+        Wind velocity.
+    T_flue_inlet : pint.Quantity
+        Flue gas inlet temperature.
+    excess_air : float
+        Excess air ratio.
 
-"""" Allocate Time-Dependant Arrays """
-T_flue_time = np.zeros(len(times), dtype=object) # Use dtype=object for quantity arrays
-T_steel_time = np.zeros(len(times), dtype=object)
-T_iso_time = np.zeros(len(times), dtype=object)
-P_buoyant_time = np.zeros(len(times), dtype=object)
-P_friction_time = np.zeros(len(times), dtype=object)
-P_total_time = np.zeros(len(times), dtype=object)
-vol_flow_rates_out_1 = Q_(np.zeros(len(times)), 'm**3/s')
-vol_flow_rates_out_2 = Q_(np.zeros(len(times)), 'm**3/s')
+    Returns
+    -------
+    None
+    """
 
-""" Calculate flow rates from scale data + assumed state """
-mdots_DF = Q_(np.zeros(len(times)), 'kg/s')
-for i in range(len(times)):
-    mdots_DF[i] = mdot_highpow(times[i])  # Get mass flow rate at this time step
-mdots_products = mass_ratio_products(excess_air) * mdots_DF
-vol_flow_rates_in = mdots_products / density_flue_gas(T_flue_inlet, P_amb)
+    # Gravitational acceleration
+    grav = Q_(9.8, 'm/s**2')
 
-""" Initialize Previous Values for Better Convergence """
-T_steel_prev = Q_(np.ones_like(overall_height_arr) * T_amb.magnitude, 'K')
-T_iso_prev = Q_(np.ones_like(overall_height_arr) * T_amb.magnitude, 'K')
+    """ Simulation time array"""
+    times = np.arange(0.0, t_simulation, timestep)
 
-for i in range(len(times)):
-    """ CALCULATE EACH SECTIONS CONTRIBUTION TO DRAFT """
-    ## Allocate Arrays
-    T_flue_av_prof = Q_(np.ones_like(overall_height_arr), 'K')
-    T_steel_prof = Q_(np.ones_like(overall_height_arr), 'K')
-    T_iso_prof = Q_(np.ones_like(overall_height_arr), 'K')
-    T_out_prof = Q_(np.ones_like(overall_height_arr), 'K')
-    P_buoyant = Q_(np.zeros_like(overall_height_arr), 'Pa')
-    P_friction = Q_(np.zeros_like(overall_height_arr), 'Pa')
+    """ Allocate Time-Dependent Arrays """
+    T_flue_time = Q_(np.zeros(len(times)), 'K')
+    T_steel_time = Q_(np.zeros(len(times)), 'K')
+    T_iso_time = Q_(np.zeros(len(times)), 'K')
+    P_buoyant_time = Q_(np.zeros(len(times)), 'Pa')
+    P_friction_time = Q_(np.zeros(len(times)), 'Pa')
+    P_total_time = Q_(np.zeros(len(times)), 'Pa')
+    vol_flow_rates_out_1 = Q_(np.zeros(len(times)), 'm**3/s')
+    vol_flow_rates_out_2 = Q_(np.zeros(len(times)), 'm**3/s')
 
-    """ BUOYANCY """
-    for n in range(len(overall_height_arr)):
-        """ Intermediate Values """
-        flue_vel = flue_velocity_in(vol_flow_rates_in[i], A_cs)
-        htc_inner = inner_heat_transfer_coefficient(d_i_arr[n], flue_vel)
-        kA1 = heat_transmission_in(section_height_arr[n], htc_inner, d_i_arr[n])
-        C_flue = Cp_flue_gas(T_flue_inlet)
-        gamma_1_loop = intermediate_gamma_1(kA1, section_height_arr[0], mdots_products[i], C_flue)
+    """ Calculate flow rates from scale data + assumed state """
+    mdots_DF = Q_(np.zeros(len(times)), 'kg/s')
+    for i in range(len(times)):
+        mdots_DF[i] = mdot_highpow(times[i])  # Get mass flow rate at this time step
+    mdots_products = mass_ratio_products(excess_air) * mdots_DF
+    vol_flow_rates_in = mdots_products / density_flue_gas(T_flue_inlet, P_amb)
 
-        if n == 0:
-            """ CHIMNEY INLET """
-            htc_outer = outer_heat_transfer_coefficient(d_o_arr[n], v_wind, T_flue_inlet, T_flue_inlet, T_amb, section_height_arr[n])
-            kA2 = heat_transmission_through(section_height_arr[n], d_o_arr[n], d_i_arr[n], conductivity_iso_krueger(T_amb), htc_outer)
-            kA3 = heat_transmission_out(section_height_arr[n], htc_outer, d_o_arr[n])
-            gamma_2_loop = intermediate_gamma_2(m_steel[n], Cp_steel(), m_iso[n], Cp_iso(), kA2, kA3)
+    """ Initialize Previous Values for Better Convergence """
+    T_steel_prev = Q_(np.ones_like(overall_height_arr) * T_amb.magnitude, 'K')
+    T_iso_prev = Q_(np.ones_like(overall_height_arr) * T_amb.magnitude, 'K')
 
-            # Use previous time step values if available
-            if i == 0:
-                T_steel_guess = T_amb
-                T_iso_guess = T_amb
+    for i in range(len(times)):
+        """ CALCULATE EACH SECTIONS CONTRIBUTION TO DRAFT """
+        ## Allocate Arrays
+        T_flue_av_prof = Q_(np.ones_like(overall_height_arr), 'K')
+        T_steel_prof = Q_(np.ones_like(overall_height_arr), 'K')
+        T_iso_prof = Q_(np.ones_like(overall_height_arr), 'K')
+        T_out_prof = Q_(np.ones_like(overall_height_arr), 'K')
+        P_buoyant = Q_(np.zeros_like(overall_height_arr), 'Pa')
+        P_friction = Q_(np.zeros_like(overall_height_arr), 'Pa')
+
+        """ BUOYANCY """
+        for n in range(len(overall_height_arr)):
+            """ Intermediate Values """
+            flue_vel = flue_velocity_in(vol_flow_rates_in[i], A_cs)
+            htc_inner = inner_heat_transfer_coefficient(d_i_arr[n], flue_vel)
+            kA1 = heat_transmission_in(section_height_arr[n], htc_inner, d_i_arr[n])
+            C_flue = Cp_flue_gas(T_flue_inlet)
+            gamma_1_loop = intermediate_gamma_1(kA1, section_height_arr[0], mdots_products[i], C_flue)
+
+            if n == 0:
+                """ CHIMNEY INLET """
+                htc_outer = outer_heat_transfer_coefficient(d_o_arr[n], v_wind, T_flue_inlet, T_flue_inlet, T_amb, section_height_arr[n])
+                kA2 = heat_transmission_through(section_height_arr[n], d_o_arr[n], d_i_arr[n], conductivity_iso_krueger(T_amb), htc_outer)
+                kA3 = heat_transmission_out(section_height_arr[n], htc_outer, d_o_arr[n])
+                gamma_2_loop = intermediate_gamma_2(m_steel[n], Cp_steel(), m_iso[n], Cp_iso(), kA2, kA3)
+
+                # Use previous time step values if available
+                if i == 0:
+                    T_steel_guess = T_amb
+                    T_iso_guess = T_amb
+                else:
+                    T_steel_guess = T_steel_prev[n]
+                    T_iso_guess = T_iso_prev[n]
+
+                # ITERATIVE CALCULATION
+                T_flue_av_int, T_steel_int, T_iso_int = iterate_flue_gas_temperature(
+                    T_flue_inlet, T_steel_guess, T_iso_guess, T_amb, section_height_arr[n], kA1, kA2, kA3, gamma_1_loop, gamma_2_loop
+                )
+
+                T_flue_av_prof[n] = T_flue_av_int
+                T_steel_prof[n] = T_steel_int
+                T_iso_prof[n] = T_iso_int
+                T_out_prof[n] = calculate_T_flue_out(gamma_1_loop, section_height_arr[n], T_flue_inlet, T_steel_int)
+
             else:
-                T_steel_guess = T_steel_prev[n]
-                T_iso_guess = T_iso_prev[n]
+                """ CHIMNEY NODE - Receives Flue Gas from Node Below """
+                htc_outer = outer_heat_transfer_coefficient(d_o_arr[n], v_wind, T_steel_prof[n-1], T_iso_prof[n-1], T_amb, section_height_arr[n])
+                kA2 = heat_transmission_through(section_height_arr[n], d_o_arr[n], d_i_arr[n], conductivity_iso_krueger(T_iso_prof[n-1]), htc_outer)
+                kA3 = heat_transmission_out(section_height_arr[n], htc_outer, d_o_arr[n])
+                gamma_2_loop = intermediate_gamma_2(m_steel[n], Cp_steel(), m_iso[n], Cp_iso(), kA2, kA3)
 
-            # ITERATIVE CALCULATION
-            T_flue_av_int, T_steel_int, T_iso_int = iterate_flue_gas_temperature(
-                T_flue_inlet, T_steel_guess, T_iso_guess, T_amb, section_height_arr[n], kA1, kA2, kA3, gamma_1_loop, gamma_2_loop
-            )
+                # Use previous time step values if available
+                if i == 0:
+                    T_steel_guess = T_amb
+                    T_iso_guess = T_amb
+                else:
+                    T_steel_guess = T_steel_prev[n]
+                    T_iso_guess = T_iso_prev[n]
 
-            T_flue_av_prof[n] = T_flue_av_int
-            T_steel_prof[n] = T_steel_int
-            T_iso_prof[n] = T_iso_int
-            T_out_prof[n] = calculate_T_flue_out(gamma_1_loop, section_height_arr[n], T_flue_inlet, T_steel_int)
+                T_flue_av_int, T_steel_int, T_iso_int = iterate_flue_gas_temperature(
+                    T_flue_av_prof[n-1], T_steel_guess, T_iso_guess, T_amb, section_height_arr[n], kA1, kA2, kA3, gamma_1_loop, gamma_2_loop
+                )
 
-        else:
-            """ CHIMNEY NODE - Receives Flue Gas from Node Below """
-            htc_outer = outer_heat_transfer_coefficient(d_o_arr[n], v_wind, T_steel_prof[n-1], T_iso_prof[n-1], T_amb, section_height_arr[n])
-            kA2 = heat_transmission_through(section_height_arr[n], d_o_arr[n], d_i_arr[n], conductivity_iso_krueger(T_iso_prof[n-1]), htc_outer)
-            kA3 = heat_transmission_out(section_height_arr[n], htc_outer, d_o_arr[n])
-            gamma_2_loop = intermediate_gamma_2(m_steel[n], Cp_steel(), m_iso[n], Cp_iso(), kA2, kA3)
+                T_flue_av_prof[n] = T_flue_av_int
+                T_steel_prof[n] = T_steel_int
+                T_iso_prof[n] = T_iso_int
+                T_out_prof[n] = calculate_T_flue_out(gamma_1_loop, section_height_arr[n], T_out_prof[n-1], T_steel_int)
 
-            # Use previous time step values if available
-            if i == 0:
-                T_steel_guess = T_amb
-                T_iso_guess = T_amb
-            else:
-                T_steel_guess = T_steel_prev[n]
-                T_iso_guess = T_iso_prev[n]
+            """ BUOYANCY PRESSURE """
+            P_buoyant[n] = grav * section_height_arr[n] * (density_amb(T_amb) - density_flue_gas(T_flue_av_prof[n], P_amb))
 
-            T_flue_av_int, T_steel_int, T_iso_int = iterate_flue_gas_temperature(
-                T_flue_av_prof[n-1], T_steel_guess, T_iso_guess, T_amb, section_height_arr[n], kA1, kA2, kA3, gamma_1_loop, gamma_2_loop
-            )
+            """ FRICTION PRESSURE """
+            Re_loop = reynolds(density_flue_gas(T_flue_av_prof[n], P_amb), flue_vel, d_i_arr[n], mu_flue_gas(T_flue_av_prof[n]))
+            P_friction[n] = section_pressure_drop(section_height_arr[n], d_i_arr[n], flue_vel, Re_loop, density_flue_gas(T_flue_av_prof[n], P_amb))
 
-            T_flue_av_prof[n] = T_flue_av_int
-            T_steel_prof[n] = T_steel_int
-            T_iso_prof[n] = T_iso_int
-            T_out_prof[n] = calculate_T_flue_out(gamma_1_loop, section_height_arr[n], T_out_prof[n-1], T_steel_int)
+        """ WIND PRESSURE """
+        P_wind = wind_pressure(v_wind, T_amb, P_amb)
 
-        """ BUOYANCY PRESSURE """
-        P_buoyant[n] = grav * section_height_arr[n] * (density_amb(T_amb) - density_flue_gas(T_flue_av_prof[n], P_amb))
+        """ TOTAL OUTLET DRAFT """
+        P_total = -1.0*P_wind + np.sum(P_friction) - np.sum(P_buoyant)
 
-        """ FRICTION PRESSURE """
-        Re_loop = reynolds(density_flue_gas(T_flue_av_prof[n], P_amb), flue_vel, d_i_arr[n], mu_flue_gas(T_flue_av_prof[n]))
-        P_friction[n] = section_pressure_drop(section_height_arr[n], d_i_arr[n], flue_vel, Re_loop, density_flue_gas(T_flue_av_prof[n], P_amb))
+        """ STORE VALUES IN ARRAYS """
+        T_flue_time[i] = np.copy(T_flue_av_prof)
+        T_steel_time[i] = np.copy(T_steel_prof)
+        T_iso_time[i] = np.copy(T_iso_prof)
+        P_buoyant_time[i] = np.copy(P_buoyant)
+        P_friction_time[i] = np.copy(P_friction)
+        P_total_time[i] = P_total
 
-    """ WIND PRESSURE """
-    P_wind = wind_pressure(v_wind, T_amb, P_amb)
+        """ SOLVE FOR VOLUME FLOW RATES TO PLOT """
+        P_pitot = -1.0*P_wind + P_friction[-1] - P_buoyant[-1]
+        vol_flow_rates_out_2[i] = mdots_products[i] / density_flue_gas(T_flue_av_prof[-1], P_amb+P_pitot)
 
-    """ TOTAL OUTLET DRAFT """
-    P_total = -1.0*P_wind + np.sum(P_friction) - np.sum(P_buoyant)
-    print('Total friction pressure drop:')
-    print(np.sum(P_friction))
-    print('Total Buoyant Pressure:')
-    print(np.sum(P_buoyant))
+        """ UPDATE PREVIOUS VALUES FOR NEXT TIME STEP """
+        T_steel_prev = np.copy(T_steel_prof)
+        T_iso_prev = np.copy(T_iso_prof)
 
-    """ STORE VALUES IN ARRAYS """
-    T_flue_time[i] = np.copy(T_flue_av_prof)
-    T_steel_time[i] = np.copy(T_steel_prof)
-    T_iso_time[i] = np.copy(T_iso_prof)
-    P_buoyant_time[i] = np.copy(P_buoyant)
-    P_friction_time[i] = np.copy(P_friction)
-    P_total_time[i] = P_total
-
-
-    """ SOLVE FOR VOLUME FLOW RATES TO PLOT """
-    # Static Draft/Friction Pressure at Pitot tube, 1 ft from exit
-    P_pitot = -1.0*P_wind + P_friction[-1] - P_buoyant[-1]
-    # Solve for Volume Flow Rate using Temp + Pressure at Pitot
-    vol_flow_rates_out_2[i] = mdots_products[i] / density_flue_gas(T_flue_av_prof[-1], P_amb+P_pitot)
-    
-    
-    """ UPDATE PREVIOUS VALUES FOR NEXT TIME STEP """
-    T_steel_prev = np.copy(T_steel_prof)
-    T_iso_prev = np.copy(T_iso_prof)
-
-    print('Simulation Time:', times[i])
+        print('Simulation Time:', times[i])
