@@ -41,19 +41,6 @@ from .geometry_setup import d_o_arr
 from .geometry_setup import m_iso
 
 
-""" Simulation Inputs """
-# Ambient Temperature/Pressure
-T_amb = Q_(15.0, 'degC').to('K')
-P_amb = Q_(1.0, 'atm').to('Pa')
-# Wind Velocity
-v_wind = Q_(0.0, 'm/s')
-# Simulation time
-t_simulation = 3000.0
-timestep = 1.0
-# Combustion inputs
-T_flue_inlet = Q_(515.0, 'K')
-excess_air = 1.5
-
 def run_simulation(t_simulation, timestep, T_amb, P_amb, v_wind, T_flue_inlet, excess_air):
     """
     Runs the chimney draft simulation with the given inputs.
@@ -83,10 +70,10 @@ def run_simulation(t_simulation, timestep, T_amb, P_amb, v_wind, T_flue_inlet, e
     # Gravitational acceleration
     grav = Q_(9.8, 'm/s**2')
 
-    """ Simulation time array"""
+    ## Simulation time array
     times = np.arange(0.0, t_simulation, timestep)
 
-    """ Allocate Time-Dependent Arrays """
+    ## Allocate Time-Dependent Arrays
     T_flue_time = Q_(np.zeros(len(times)), 'K')
     T_steel_time = Q_(np.zeros(len(times)), 'K')
     T_iso_time = Q_(np.zeros(len(times)), 'K')
@@ -96,19 +83,19 @@ def run_simulation(t_simulation, timestep, T_amb, P_amb, v_wind, T_flue_inlet, e
     vol_flow_rates_out_1 = Q_(np.zeros(len(times)), 'm**3/s')
     vol_flow_rates_out_2 = Q_(np.zeros(len(times)), 'm**3/s')
 
-    """ Calculate flow rates from scale data + assumed state """
+    ## Calculate flow rates from scale data + assumed state 
     mdots_DF = Q_(np.zeros(len(times)), 'kg/s')
     for i in range(len(times)):
         mdots_DF[i] = mdot_highpow(times[i])  # Get mass flow rate at this time step
     mdots_products = mass_ratio_products(excess_air) * mdots_DF
     vol_flow_rates_in = mdots_products / density_flue_gas(T_flue_inlet, P_amb)
 
-    """ Initialize Previous Values for Better Convergence """
+    ## Initialize Previous Values for Better Convergence 
     T_steel_prev = Q_(np.ones_like(overall_height_arr) * T_amb.magnitude, 'K')
     T_iso_prev = Q_(np.ones_like(overall_height_arr) * T_amb.magnitude, 'K')
 
     for i in range(len(times)):
-        """ CALCULATE EACH SECTIONS CONTRIBUTION TO DRAFT """
+        ## CALCULATE EACH SECTIONS CONTRIBUTION TO DRAFT 
         ## Allocate Arrays
         T_flue_av_prof = Q_(np.ones_like(overall_height_arr), 'K')
         T_steel_prof = Q_(np.ones_like(overall_height_arr), 'K')
@@ -117,7 +104,7 @@ def run_simulation(t_simulation, timestep, T_amb, P_amb, v_wind, T_flue_inlet, e
         P_buoyant = Q_(np.zeros_like(overall_height_arr), 'Pa')
         P_friction = Q_(np.zeros_like(overall_height_arr), 'Pa')
 
-        """ BUOYANCY """
+        ## BUOYANCY 
         for n in range(len(overall_height_arr)):
             """ Intermediate Values """
             flue_vel = flue_velocity_in(vol_flow_rates_in[i], A_cs)
@@ -175,20 +162,20 @@ def run_simulation(t_simulation, timestep, T_amb, P_amb, v_wind, T_flue_inlet, e
                 T_iso_prof[n] = T_iso_int
                 T_out_prof[n] = calculate_T_flue_out(gamma_1_loop, section_height_arr[n], T_out_prof[n-1], T_steel_int)
 
-            """ BUOYANCY PRESSURE """
+            ## BUOYANCY PRESSURE
             P_buoyant[n] = grav * section_height_arr[n] * (density_amb(T_amb) - density_flue_gas(T_flue_av_prof[n], P_amb))
 
-            """ FRICTION PRESSURE """
+            ## FRICTION PRESSURE
             Re_loop = reynolds(density_flue_gas(T_flue_av_prof[n], P_amb), flue_vel, d_i_arr[n], mu_flue_gas(T_flue_av_prof[n]))
             P_friction[n] = section_pressure_drop(section_height_arr[n], d_i_arr[n], flue_vel, Re_loop, density_flue_gas(T_flue_av_prof[n], P_amb))
 
-        """ WIND PRESSURE """
+        ## WIND PRESSURE
         P_wind = wind_pressure(v_wind, T_amb, P_amb)
 
-        """ TOTAL OUTLET DRAFT """
+        ## TOTAL OUTLET DRAFT
         P_total = -1.0*P_wind + np.sum(P_friction) - np.sum(P_buoyant)
 
-        """ STORE VALUES IN ARRAYS """
+        ## STORE VALUES IN ARRAYS
         T_flue_time[i] = np.copy(T_flue_av_prof)
         T_steel_time[i] = np.copy(T_steel_prof)
         T_iso_time[i] = np.copy(T_iso_prof)
@@ -196,11 +183,11 @@ def run_simulation(t_simulation, timestep, T_amb, P_amb, v_wind, T_flue_inlet, e
         P_friction_time[i] = np.copy(P_friction)
         P_total_time[i] = P_total
 
-        """ SOLVE FOR VOLUME FLOW RATES TO PLOT """
+        ## SOLVE FOR VOLUME FLOW RATES TO PLOT
         P_pitot = -1.0*P_wind + P_friction[-1] - P_buoyant[-1]
-        vol_flow_rates_out_2[i] = mdots_products[i] / density_flue_gas(T_flue_av_prof[-1], P_amb+P_pitot)
+        vol_flow_rates_out[i] = mdots_products[i] / density_flue_gas(T_flue_av_prof[-1], P_amb+P_pitot)
 
-        """ UPDATE PREVIOUS VALUES FOR NEXT TIME STEP """
+        ## UPDATE PREVIOUS VALUES FOR NEXT TIME STEP
         T_steel_prev = np.copy(T_steel_prof)
         T_iso_prev = np.copy(T_iso_prof)
 
