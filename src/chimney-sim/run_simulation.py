@@ -80,8 +80,7 @@ def run_simulation(t_simulation, timestep, T_amb, P_amb, v_wind, T_flue_inlet, e
     P_buoyant_time = Q_(np.zeros(len(times)), 'Pa')
     P_friction_time = Q_(np.zeros(len(times)), 'Pa')
     P_total_time = Q_(np.zeros(len(times)), 'Pa')
-    vol_flow_rates_out_1 = Q_(np.zeros(len(times)), 'm**3/s')
-    vol_flow_rates_out_2 = Q_(np.zeros(len(times)), 'm**3/s')
+    vol_flow_rates_out = Q_(np.zeros(len(times)), 'm**3/s')
 
     ## Calculate flow rates from scale data + assumed state 
     mdots_DF = Q_(np.zeros(len(times)), 'kg/s')

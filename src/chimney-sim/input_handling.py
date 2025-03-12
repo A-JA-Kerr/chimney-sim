@@ -1,21 +1,12 @@
 import argparse
 import yaml
 
+from pint import UnitRegistry
+ureg = UnitRegistry()
+Q_ = ureg.Quantity
+
 ## IMPORT MAIN CALCULATION FUNCTION
 from .run_simulation import run_simulation
-
-""" Simulation Inputs """
-# Ambient Temperature/Pressure
-T_amb = Q_(15.0, 'degC').to('K')
-P_amb = Q_(1.0, 'atm').to('Pa')
-# Wind Velocity
-v_wind = Q_(0.0, 'm/s')
-# Simulation time
-t_simulation = 3000.0
-timestep = 1.0
-# Combustion inputs
-T_flue_inlet = Q_(515.0, 'K')
-excess_air = 1.5
 
 def parse_arguments():
     """
@@ -52,10 +43,18 @@ def main():
     """
     Main function to execute multiple simulations for different T_flue_inlet and excess_air values.
 
-    Reads input parameters from a YAML file and runs batch simulations.
+    Reads input parameters from a YAML file, extracts relevant input values,
+    and runs batch simulations for each combination of T_flue_inlet and excess_air.
     """
     args = parse_arguments()  # Parse command-line arguments
     config = read_yaml_file(args.config)  # Read YAML configuration file
+
+    # Extract single-value inputs from the config file
+    t_simulation = config['simulation']['t_simulation']
+    timestep = config['simulation']['timestep']
+    T_amb = Q_(config['environment']['T_amb'], 'K')
+    P_amb = Q_(config['environment']['P_amb'], 'Pa')
+    v_wind = Q_(config['environment']['v_wind'], 'm/s')
 
     # Get lists of T_flue_inlet and excess_air values from the config
     T_flue_inlet_list = config['combustion']['T_flue_inlet']
@@ -64,7 +63,7 @@ def main():
     # Run simulations for each combination of T_flue_inlet and excess_air
     for T_flue_inlet in T_flue_inlet_list:
         for excess_air in excess_air_list:
-            run_simulation(T_flue_inlet, excess_air, config)
+            run_simulation(t_simulation, timestep, T_amb, P_amb, v_wind, Q_(T_flue_inlet, 'K'), excess_air)
 
 if __name__ == "__main__":
     main()
