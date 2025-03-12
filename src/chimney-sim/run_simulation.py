@@ -64,7 +64,16 @@ def run_simulation(t_simulation, timestep, T_amb, P_amb, v_wind, T_flue_inlet, e
 
     Returns
     -------
-    None
+    tuple
+        (times, T_flue_time, vol_flow_rates_out, P_total_time)
+        - times : np.ndarray
+            Time steps.
+        - T_flue_time : np.ndarray
+            Flue gas temperature profile over time.
+        - vol_flow_rates_out : np.ndarray
+            Volume flow rates at the outlet over time.
+        - P_total_time : np.ndarray
+            Total pressure over time.
     """
 
     # Gravitational acceleration
@@ -191,3 +200,4 @@ def run_simulation(t_simulation, timestep, T_amb, P_amb, v_wind, T_flue_inlet, e
         T_iso_prev = np.copy(T_iso_prof)
 
         print('Simulation Time:', times[i])
+    return times, T_flue_time, vol_flow_rates_out, P_total_time
