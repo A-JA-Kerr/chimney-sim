@@ -19,6 +19,7 @@ def parse_arguments():
     """
     parser = argparse.ArgumentParser(description="Run the chimney draft simulation.")
     parser.add_argument('--input', type=str, required=True, help="Path to the YAML input file.")
+    parser.add_argument('--output', type=str, required=True, help="Path to the output results directory.")
     return parser.parse_args()
 
 def read_yaml_file(file_path):
@@ -47,18 +48,18 @@ def main():
     and runs batch simulations for each combination of T_flue_inlet and excess_air.
     """
     args = parse_arguments()  # Parse command-line arguments
-    config = read_yaml_file(args.config)  # Read YAML configuration file
+    input = read_yaml_file(args.input)  # Read YAML input file
 
     # Extract single-value inputs from the config file
-    t_simulation = config['simulation']['t_simulation']
-    timestep = config['simulation']['timestep']
-    T_amb = Q_(config['environment']['T_amb'], 'K')
-    P_amb = Q_(config['environment']['P_amb'], 'Pa')
-    v_wind = Q_(config['environment']['v_wind'], 'm/s')
+    t_simulation = input['simulation']['t_simulation']
+    timestep = input['simulation']['timestep']
+    T_amb = Q_(input['environment']['T_amb'], 'K')
+    P_amb = Q_(input['environment']['P_amb'], 'Pa')
+    v_wind = Q_(input['environment']['v_wind'], 'm/s')
 
     # Get lists of T_flue_inlet and excess_air values from the config
-    T_flue_inlet_list = config['combustion']['T_flue_inlet']
-    excess_air_list = config['combustion']['excess_air']
+    T_flue_inlet_list = input['combustion']['T_flue_inlet']
+    excess_air_list = input['combustion']['excess_air']
 
     # Run simulations for each combination of T_flue_inlet and excess_air
     for T_flue_inlet in T_flue_inlet_list:

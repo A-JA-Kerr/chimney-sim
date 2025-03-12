@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chimney-sim"
+dynamic = ["version"]
+description = "A Python package for simulating chimney draft performance."
+authors = [{ name = "Adam Kerr", email = "adamkerr.mechanical@gmail.com" }]
+license = { file = "LICENSE" }
+readme = "README.md"
+dependencies = [
+    "pint",
+    "numpy",
+    "pyyaml",
+    "argparse"
+]
+
+[tool.setuptools]
+packages = ["chimney_sim"]
+
+[tool.setuptools.dynamic]
+version = { attr = "chimney_sim._version.__version__" }
