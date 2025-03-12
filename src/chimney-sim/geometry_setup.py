@@ -18,6 +18,7 @@ First 6 feet, only 6 inch ID steel
 Last 7 feet, packed insulation (2 inches)
 """
 d_i_arr = Q_(6.0, 'in')*np.ones_like(overall_height_arr)
+A_cs = np.pi*(0.5*d_i_arr[0])**2
 steel_thickness = Q_(0.0239,'in') # Guage 24 Steel
 steel_density = Q_(7832.0, 'kg/m**3')
 d_o_arr = d_i_arr + steel_thickness
