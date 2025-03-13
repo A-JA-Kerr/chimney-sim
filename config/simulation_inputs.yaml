@@ -1,5 +1,5 @@
 simulation:
-  t_simulation: 3000.0  # Total simulation time in seconds
+  t_simulation: 600.0  # Total simulation time in seconds
   timestep: 1.0       # Time step for simulation in seconds
 
 environment:

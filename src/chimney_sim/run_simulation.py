@@ -81,9 +81,9 @@ def run_simulation(t_simulation, timestep, T_amb, P_amb, v_wind, T_flue_inlet, e
     times = np.arange(0.0, t_simulation, timestep)
 
     ## Allocate Time-Dependent Arrays
-    T_flue_time = Q_(np.zeros(len(times)), 'K')
-    T_steel_time = Q_(np.zeros(len(times)), 'K')
-    T_iso_time = Q_(np.zeros(len(times)), 'K')
+    T_flue_time = np.zeros(len(times), dtype=object) # Use dtype=object for quantity arrays
+    T_steel_time = np.zeros(len(times), dtype=object) 
+    T_iso_time = np.zeros(len(times), dtype=object) 
     P_buoyant_time = Q_(np.zeros(len(times)), 'Pa')
     P_friction_time = Q_(np.zeros(len(times)), 'Pa')
     P_total_time = Q_(np.zeros(len(times)), 'Pa')
@@ -185,9 +185,9 @@ def run_simulation(t_simulation, timestep, T_amb, P_amb, v_wind, T_flue_inlet, e
         T_flue_time[i] = np.copy(T_flue_av_prof)
         T_steel_time[i] = np.copy(T_steel_prof)
         T_iso_time[i] = np.copy(T_iso_prof)
-        P_buoyant_time[i] = np.copy(P_buoyant)
-        P_friction_time[i] = np.copy(P_friction)
-        P_total_time[i] = P_total
+        P_buoyant_time[i] = np.copy(np.sum(P_buoyant))
+        P_friction_time[i] = np.copy(np.sum(P_friction))
+        P_total_time[i] = P_total.to('Pa')*-1.0
 
         ## SOLVE FOR VOLUME FLOW RATES TO PLOT
         P_pitot = -1.0*P_wind + P_friction[-1] - P_buoyant[-1]

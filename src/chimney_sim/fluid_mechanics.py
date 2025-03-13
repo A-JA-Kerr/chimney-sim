@@ -1,6 +1,7 @@
 import numpy as np
 
 from .units import ureg, Q_
+from .thermo_properties import density_amb
 
 def friction_factor(Re):
     """
@@ -97,5 +98,5 @@ def wind_pressure(v_wind, T_amb, Pres):
     pint.Quantity
         Wind pressure contribution (in Pascals).
     """
-    p_wind = 0.5 * density_amb(T_amb) * v_wind**2
+    p_wind = 0.5 * density_amb(T_amb, Pres) * v_wind**2
     return p_wind
