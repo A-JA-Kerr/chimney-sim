@@ -123,7 +123,7 @@ def main():
     # Extract single-value inputs from the config file
     t_simulation = input_data['simulation']['t_simulation']
     timestep = input_data['simulation']['timestep']
-    T_amb = Q_(input_data['environment']['T_amb'], 'K')
+    T_amb = Q_(input_data['environment']['T_amb'], 'degC').to('K')
     P_amb = Q_(input_data['environment']['P_amb'], 'Pa')
     v_wind = Q_(input_data['environment']['v_wind'], 'm/s')
 

@@ -187,7 +187,7 @@ def run_simulation(t_simulation, timestep, T_amb, P_amb, v_wind, T_flue_inlet, e
         T_iso_time[i] = np.copy(T_iso_prof)
         P_buoyant_time[i] = np.copy(np.sum(P_buoyant))
         P_friction_time[i] = np.copy(np.sum(P_friction))
-        P_total_time[i] = P_total.to('Pa')*-1.0
+        P_total_time[i] = P_total*-1.0
 
         ## SOLVE FOR VOLUME FLOW RATES TO PLOT
         P_pitot = -1.0*P_wind + P_friction[-1] - P_buoyant[-1]
