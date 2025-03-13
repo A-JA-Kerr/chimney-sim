@@ -169,7 +169,7 @@ def run_simulation(t_simulation, timestep, T_amb, P_amb, v_wind, T_flue_inlet, e
                 T_out_prof[n] = calculate_T_flue_out(gamma_1_loop, section_height_arr[n], T_out_prof[n-1], T_steel_int)
 
             ## BUOYANCY PRESSURE
-            P_buoyant[n] = grav * section_height_arr[n] * (density_amb(T_amb) - density_flue_gas(T_flue_av_prof[n], P_amb))
+            P_buoyant[n] = grav * section_height_arr[n] * (density_amb(T_amb, P_amb) - density_flue_gas(T_flue_av_prof[n], P_amb))
 
             ## FRICTION PRESSURE
             Re_loop = reynolds(density_flue_gas(T_flue_av_prof[n], P_amb), flue_vel, d_i_arr[n], mu_flue_gas(T_flue_av_prof[n]))

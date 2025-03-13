@@ -44,32 +44,33 @@ def Cp_iso():
     """
     return Q_(835.0, 'J/(kg*K)')
 
-def density_flue_gas(T):
+def density_flue_gas(T, P):
     """
-    Compute the density of flue gas using the ideal gas law.
-
-    Assumes a constant molar mass and standard atmospheric pressure.
-
+    Calculate the density of flue gas using the ideal gas law.
+    
     Parameters
     ----------
-    T : pint.Quantity
-        Temperature of the flue gas [K].
-
+    T : quantity
+        Temperature in Kelvin.
+    
     Returns
     -------
-    pint.Quantity
-        Density of the flue gas [kg/m³].
+    quantity
+        Density in kg/m³.
     """
+    # Unit handling
     T_K = T.to('K').magnitude
-    P = 101325  # Pressure in Pa (standard atmospheric pressure)
-    M = 0.029559  # Molar mass of flue gas [kg/mol]
-    R = 8.314  # Universal gas constant [J/(mol·K)]
+    P_pa = P.to('Pa').magnitude
+    ## Assume constant molar mass, approximate pressure
+    M = 0.029559  # kg/mol
+    R = 8.314  # J/(mol·K)
 
-    rho = (P * M) / (R * T_K)
+    rho = (P_pa * M)/(R * T_K)
     return Q_(rho, 'kg/m**3')
 
 
-def density_amb(T):
+
+def density_amb(T, P):
     """
     Compute the density of ambient air using the ideal gas law.
 
@@ -84,13 +85,15 @@ def density_amb(T):
     -------
     pint.Quantity
         Density of the ambient air [kg/m³].
-    """
+        """
+    # Unit handling
     T_K = T.to('K').magnitude
-    P = 101325  # Pressure in Pa (standard atmospheric pressure)
+    P_pa = P.to('Pa').magnitude
+
     M = 0.02897  # Molar mass of dry air [kg/mol]
     R = 8.314  # Universal gas constant [J/(mol·K)]
 
-    rho = (P * M) / (R * T_K)
+    rho = (P_pa * M) / (R * T_K)
     return Q_(rho, 'kg/m**3')
 
 
