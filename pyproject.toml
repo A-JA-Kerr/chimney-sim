@@ -1,23 +1,31 @@
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling>=1.13.0", "hatch-vcs>=0.3.0"]
+build-backend = "hatchling.build"
 
 [project]
 name = "chimney-sim"
 dynamic = ["version"]
 description = "A Python package for simulating chimney draft performance."
-authors = [{ name = "Adam Kerr", email = "adamkerr.mechanical@gmail.com" }]
-license = { file = "LICENSE" }
 readme = "README.md"
+license = { text = "MIT" }  # Replace with your actual license
+authors = [
+  { name = "Adam Kerr", email = "adamkerr.mechanical@gmail.com" },
+]
+requires-python = ">=3.8"
+
 dependencies = [
-    "pint",
-    "numpy",
-    "pyyaml",
+    "pint>=0.20,<0.22",
+    "numpy>=1.21,<2.0",
+    "pyyaml>=6.0,<7.0",
     "argparse"
 ]
 
-[tool.setuptools]
-packages = ["chimney_sim"]
+[tool.hatch.version]
+source = "vcs"
 
-[tool.setuptools.dynamic]
-version = { attr = "chimney_sim._version.__version__" }
+[tool.hatch.version.raw-options]
+local_scheme = "no-local-version"
+root = ".."
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/chimney_sim/_version.py"
