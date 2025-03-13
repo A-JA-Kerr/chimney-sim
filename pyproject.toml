@@ -25,7 +25,7 @@ source = "vcs"
 
 [tool.hatch.version.raw-options]
 local_scheme = "no-local-version"
-root = ".."
+root = "."
 
 [tool.hatch.build.hooks.vcs]
 version-file = "src/chimney_sim/_version.py"
