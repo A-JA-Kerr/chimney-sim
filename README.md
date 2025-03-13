@@ -4,8 +4,19 @@ This projet is a Python package which can be used to simulate natural draft in t
 
 ## Getting Started
 The package is broken down into the following modules:
+- flow_rates.py
+- fluid_mechanics.py
+- geometry_setup.py
+- heat_transfer.py
+- run_simulation.py
+- thermo_properties.py
+- units.py
+- wood_heat_release.py
 
-The package can be interacted with using the command line:
+The package can be interacted with using the command line. Simulation inputs are managed using a yaml file, which is included in /config/.
+
+An example of running the package is given here:
+python -m chimney_sim --input inputs_path\simulation_inputs.yaml --output outputs_path\
 
 ### Prerequisites
 What software or dependencies are required?
@@ -14,7 +25,6 @@ What software or dependencies are required?
 - Any required libraries (e.g., `numpy`, `scipy`, `cantera`)
 
 ### Installation
-Steps to install and set up your project:
-```sh
-git clone https://github.com/YourUsername/YourProject.git
-cd YourProject
+This project can be installed from this Github repository by using:
+
+pip install git+https://github.com/A-JA-Kerr/chimney-sim.git
