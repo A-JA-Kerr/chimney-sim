@@ -1,8 +1,6 @@
 import numpy as np
 
-from pint import UnitRegistry
-ureg = UnitRegistry()
-Q_ = ureg.Quantity
+from .units import ureg, Q_
 
 def Cp_steel():
     """

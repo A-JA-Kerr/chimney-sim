@@ -2,11 +2,8 @@ import argparse
 import yaml
 import os
 import csv
-from pint import UnitRegistry
 
-# Initialize Pint
-ureg = UnitRegistry()
-Q_ = ureg.Quantity
+from .units import ureg, Q_
 
 # Import main calculation function
 from .run_simulation import run_simulation
