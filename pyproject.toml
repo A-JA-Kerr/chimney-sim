@@ -3,7 +3,7 @@ requires = ["hatchling>=1.13.0", "hatch-vcs>=0.3.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "chimney-sim"
+name = "chimney_sim"
 dynamic = ["version"]
 description = "A Python package for simulating chimney draft performance."
 readme = "README.md"
@@ -28,4 +28,4 @@ local_scheme = "no-local-version"
 root = "."
 
 [tool.hatch.build.hooks.vcs]
-version-file = "src/chimney-sim/_version.py"
+version-file = "src/chimney_sim/_version.py"
