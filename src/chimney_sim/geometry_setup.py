@@ -21,7 +21,7 @@ steel_thickness = Q_(0.0239,'in') # Guage 24 Steel
 steel_density = Q_(7832.0, 'kg/m**3')
 d_o_arr = d_i_arr + steel_thickness
 ## Last 7 feet
-insulation_thickness = Q_(0.0, 'in') # Assumed
+insulation_thickness = Q_(2.0, 'in') # Assumed
 d_o_arr[7:] = d_o_arr[7:]+insulation_thickness
 
 """ Section Masses.
