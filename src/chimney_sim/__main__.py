@@ -104,7 +104,7 @@ def save_scalar_values_to_csv(output_dir, T_flue_inlet, excess_air, times, vol_f
         writer = csv.writer(file)
         writer.writerow(["Time (s)", "Vol_Flow_Out (m³/s)", "P_total (Pa)"])  # Header
         for i in range(len(times)):
-            writer.writerow([times[i], vol_flow[i].magnitude, P_total[i].magnitude])
+            writer.writerow([times[i], vol_flow[i].to('m**3/s').magnitude, P_total[i].to('Pa').magnitude])
 
     print(f"Saved scalar values to {filepath}")
 
