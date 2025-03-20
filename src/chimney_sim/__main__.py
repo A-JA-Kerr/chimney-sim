@@ -62,7 +62,7 @@ def save_temperature_profiles_to_csv(output_dir, T_flue_inlet, excess_air, times
     None
     """
     os.makedirs(output_dir, exist_ok=True)  # Ensure output directory exists
-    filename = f"NO_INSUlATION_TemperatureProfile_{T_flue_inlet:.0f}K_{excess_air:.1f}ExcessAir.csv"
+    filename = f"THICK_INSUlATION_TemperatureProfile_{T_flue_inlet:.0f}K_{excess_air:.1f}ExcessAir.csv"
     filepath = os.path.join(output_dir, filename)
 
     with open(filepath, mode='w', newline='') as file:
@@ -97,7 +97,7 @@ def save_scalar_values_to_csv(output_dir, T_flue_inlet, excess_air, times, vol_f
     None
     """
     os.makedirs(output_dir, exist_ok=True)  # Ensure output directory exists
-    filename = f"NO_INSUlATION_ScalarValues_{T_flue_inlet:.0f}K_{excess_air:.1f}ExcessAir.csv"
+    filename = f"THICK_INSUlATION_ScalarValues_{T_flue_inlet:.0f}K_{excess_air:.1f}ExcessAir.csv"
     filepath = os.path.join(output_dir, filename)
 
     with open(filepath, mode='w', newline='') as file:
