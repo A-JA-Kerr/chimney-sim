@@ -25,6 +25,6 @@ What software or dependencies are required?
 - Any required libraries (e.g., `numpy`, `scipy`, `cantera`)
 
 ### Installation
-This project can be installed from this Github repository by using:
+This project can be installed from this Github repository into your local environment by using:
 
 pip install git+https://github.com/A-JA-Kerr/chimney-sim.git
